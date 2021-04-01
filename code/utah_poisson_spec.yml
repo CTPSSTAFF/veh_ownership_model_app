@@ -1,0 +1,25 @@
+#
+# specifcication for Univ. of Utah poisson vehicle ownership count model as applied by MAPC
+#
+# field map: Maps model dependendent variables to input file field names. An empty string indicates that they are equivalent
+field_map: {}
+
+# model coefficients
+coeffs: {
+    "intercept":        -0.09, 
+    "hhsize_cat1":       0.5648,
+    "hhsize_cat2":       0.4679,
+    "hhsize_cat3":       0.5256,
+    "hhsize_cat4":       0.5206,
+    "employed_cat0":     0.4885,
+    "employed_cat1":     0.08804,
+    "employed_cat2":     0.1935,
+    "dum_income":       -0.2752,
+    "actden":           -0.00597,
+    "intden":           -0.00064,
+    "pct4way":          -0.00083,
+    "pctemp10a":        -0.00065,
+    "pctemp30a":        -0.00094,
+    "pctemp30t":        -0.00108
+    }
+
