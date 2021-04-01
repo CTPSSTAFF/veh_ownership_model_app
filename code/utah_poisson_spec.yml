@@ -1,7 +1,7 @@
 #
 # specifcication for Univ. of Utah poisson vehicle ownership count model as applied by MAPC
 #
-# field map: Maps model dependendent variables to input file field names. An empty string indicates that they are equivalent
+# field map: Maps model dependendent variables to input file field names. An empty dict indicates that the lists are equivalent
 field_map: {}
 
 # model coefficients

@@ -1,6 +1,9 @@
 /AutoOwnershipModelFiles
 /MAPCfiles
 /resources
+/test_files
 *.csv
 *.pdf
 *.txt
+*.pyc
+*.json
