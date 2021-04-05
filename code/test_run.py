@@ -6,7 +6,7 @@ try:
     print(my_model.working_dir)
     print(my_model.coeffs)
 
-    my_model.load_data
+    my_model.load_data()
 
 except Exception as err:
-    print(err.message)
+    print(err)

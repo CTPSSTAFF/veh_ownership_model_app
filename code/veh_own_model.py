@@ -29,6 +29,7 @@ class veh_model:
 
         try:
             self.working_dir = self.setup['working_dir']
+            self.data_path = self.setup['data_file_path']
             self.input_file = self.setup['input_data_file']
             self.output_file = self.setup['output_disagg_file']
             self.aggregate = self.setup['aggregate']
@@ -43,8 +44,9 @@ class veh_model:
             raise
 
     # Method load_data should be defined by sublclasses of veh_model
-    # The base class method functionality is limited to printing a message to this effec.
-    # This message will only be printed if the developer of the sublcass failed to define the method there
+    # The base class method functionality is limited to raising a NotImplementedError with a helpful message
+    # and will only be executed if the developer of the sublcass failed to define the method there.
+    # When implemented, the method should read the input data file specified in the setup file into a pandas dataframe
     def load_data(self):
-        msg = "Method load_data is undefined."
-        raise RuntimeError(msg)
+        msg = "Error: Method load_data is undefined."
+        raise NotImplementedError(msg)

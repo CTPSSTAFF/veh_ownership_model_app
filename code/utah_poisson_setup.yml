@@ -3,8 +3,8 @@
 #If aggregate output data is desired, set aggregate flag to yes and populate output_agg_file and output_agg_fields list
 #Otherwise set aggregate flag to no
 
-working_dir: G:\Regional_Modeling\vehicle_ownership_model_app\code
-data_file_path: G:\Regional_Modeling\vehicle_ownership_model_app\test_data
+working_dir: G:\Regional_Modeling\veh_ownership_model_app\code
+data_file_path: G:\Regional_Modeling\veh_ownership_model_app\test_data
 input_data_file: veh_ownership_model_RHS_2040.csv
 aggregate: yes
 output_disagg_file: veh_ownership_model_out_2040.csv
