@@ -21,7 +21,8 @@ class veh_model:
             with open(setup_file, 'r') as stream:    
                 setup = yaml.load(stream, Loader=yaml.FullLoader)
         except Exception as err:
-            err.message = "Error reading setup file (" + setup_file + ")\n" + err.message
+            msg = "Error reading setup file (" + setup_file + ")\n" + err.message
+            print(msg)
             raise
         
         self.setup = setup if setup is not None else {}
@@ -37,5 +38,13 @@ class veh_model:
             self.model_spec_file = self.setup['model_spec_file']
             self.veh_fields = self.setup['veh_fields']
         except Exception as err:
-            err.message = "Required setup parameter(s) not found in file '" + setup_file + "'\n" + err.message
+            msg = "Required setup parameter(s) were not found in file '" + setup_file + "'\n" + err.message
+            print(msg)
             raise
+
+    # Method load_data should be defined by sublclasses of veh_model
+    # The base class method functionality is limited to printing a message to this effec.
+    # This message will only be printed if the developer of the sublcass failed to define the method there
+    def load_data(self):
+        msg = "Method load_data is undefined."
+        raise RuntimeError(msg)

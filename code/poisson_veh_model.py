@@ -23,7 +23,8 @@ class poisson_model(veh_model):
             with open(self.model_spec_file, 'r') as stream:
                 specs = yaml.load(stream, Loader=yaml.FullLoader)
         except Exception as err:
-            err.message = "Error reading model specification file (" + self.model_spec_file + ")\n" + err.message
+            msg = "Error reading model specification file (" + self.model_spec_file + ")\n" + err.message
+            print(msg)
             raise
 
         self.specs = specs if specs is not None else {}
@@ -32,6 +33,7 @@ class poisson_model(veh_model):
             self.field_map = self.specs['field_map']
             self.coeffs = self.specs['coeffs']
         except Exception as err:
-            err.message = "Required model specification parameter(s) not found in file '" + self.model_spec_file + "'\n" + err.message
+            msg = "Required model specification parameter(s) not found in file '" + self.model_spec_file + "'\n" + err.message
+            print(msg)
             raise
                 
