@@ -2,9 +2,27 @@
 # specifcication for Univ. of Utah poisson vehicle ownership count model as applied by MAPC
 #
 # field map: Maps model dependendent variables to input file field names. An empty dict indicates that the lists are equivalent
-field_map: {}
+field_map: {
+    "intercept":        "intercept",
+    "hhsize_cat1":      "hhsize_cat1",
+    "hhsize_cat2":      "hhsize_cat2",
+    "hhsize_cat3":      "hhsize_cat3",
+    "hhsize_cat4":      "hhsize_cat4",
+    "employed_cat0":    "employed_cat0",
+    "employed_cat1":    "employed_cat1",
+    "employed_cat2":    "employed_cat2",
+    "dum_income":       "dum_income",
+    "actden":           "actden",
+    "intden":           "intden",
+    "pct4way":          "pct4way",
+    "pctemp10a":        "pctemp10a",
+    "pctemp30a":        "pctemp30a",
+    "pctemp30t":        "pctemp30t"
+    }
 
 # model coefficients
+# a constant / intercept term must be specified as the first item in the dict even
+# if the model does not include such a term, define one here and set it equal to 0
 coeffs: {
     "intercept":        -0.09, 
     "hhsize_cat1":       0.5648,
