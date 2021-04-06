@@ -43,10 +43,20 @@ class veh_model:
             print(msg)
             raise
 
-    # Method load_data should be defined by sublclasses of veh_model
+    # Method load_data should be defined by subclasses of veh_model
     # The base class method functionality is limited to raising a NotImplementedError with a helpful message
     # and will only be executed if the developer of the sublcass failed to define the method there.
     # When implemented, the method should read the input data file specified in the setup file into a pandas dataframe
     def load_data(self):
         msg = "Error: Method load_data is undefined."
         raise NotImplementedError(msg)
+
+    # Method run_model should be defined by subclasses of veh_model
+    # The base class method functionality is limited to raising a NotImplementedError with a helpful message
+    # and will only be executed if the developer of the sublcass failed to define the method there.
+    # When implemented, the method will apply the coefficients in the model specification file to their corresponding
+    # columns in the dataframe created by the load_data method, adding columns to store the predicted vehicle counts.
+    def run_model(self):
+        msg = "Error: Method run_model is undefined."
+        raise NotImplementedError(msg)
+

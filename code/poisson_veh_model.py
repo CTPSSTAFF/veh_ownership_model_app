@@ -16,6 +16,7 @@ class poisson_model(veh_model):
 
     def __init__(self,
                  setup_file):
+        print("initializing...")
         super().__init__(setup_file=setup_file)
 
         #parse the model specification file
@@ -43,6 +44,7 @@ class poisson_model(veh_model):
     # test1: keep just the first 1000 rows
     def load_data(self):
         #read the csv file into a dataframe and capture the column names in a list
+        print("loading input data...")
         try:
             infile = self.data_path + "\\" + self.input_file
             self.df = pd.read_csv(infile)[0:1000]
@@ -59,7 +61,7 @@ class poisson_model(veh_model):
         for i in range (1,len(self.coeffs)):
             key = keys[i]
             if len(self.field_map) == 0:
-                #field map is emtpy - column names and dependent variable names should be equivalent
+                #field map is empty - column names and dependent variable names should be equivalent
                 if key not in cols:
                     msg = "Dependent variable '" + key + "' is not associated with a column in " + self.input_file + ".\n"
                     raise RuntimeError(msg)
@@ -67,7 +69,6 @@ class poisson_model(veh_model):
                 #get the column name associated with the dependent variable from the field map
                 try:
                     col  = self.field_map[key]
-                    print(col + ": " + key)
                 except Exception as err:
                     raise RuntimeError("Key '"  + key + "' not found in field map.") from err
 

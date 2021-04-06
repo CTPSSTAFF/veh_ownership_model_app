@@ -8,5 +8,7 @@ try:
 
     my_model.load_data()
 
+    my_model.run_model()
+
 except Exception as err:
     print(err)
