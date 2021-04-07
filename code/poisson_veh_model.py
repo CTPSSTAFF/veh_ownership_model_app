@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import yaml
 import os
+import math
 from veh_own_model import veh_model
 
 class poisson_model(veh_model):
@@ -22,13 +23,11 @@ class poisson_model(veh_model):
         #parse the model specification file
         try:
             with open(self.model_spec_file, 'r') as stream:
-                specs = yaml.load(stream, Loader=yaml.FullLoader)
+                self.specs = yaml.load(stream, Loader=yaml.FullLoader)
         except Exception as err:
             msg = "Error reading model specification file (" + self.model_spec_file + ")\n" + err.message
             print(msg)
             raise
-
-        self.specs = specs if specs is not None else {}
 
         try:
             self.field_map = self.specs['field_map']
@@ -61,7 +60,7 @@ class poisson_model(veh_model):
         for i in range (1,len(self.coeffs)):
             key = keys[i]
             if len(self.field_map) == 0:
-                #field map is empty - column names and dependent variable names should be equivalent
+                #field map is empty: the column names and dependent variable names should be equivalent
                 if key not in cols:
                     msg = "Dependent variable '" + key + "' is not associated with a column in " + self.input_file + ".\n"
                     raise RuntimeError(msg)
@@ -75,7 +74,44 @@ class poisson_model(veh_model):
                 if col not in cols:
                     msg = "Dependent variable '" + key + "' is not associated with a column in " + self.input_file + ".\n"
                     raise RuntimeError(msg)
-                
+
+    # method run_model:
+    # add a column named 'log_veh' to the dataframe created by the load_data method
+    # populate the new column by applying the coefficients in the model spec to the appropriate columns
+    def run_model(self):
+        print("running model...")
+        dep_vars = list(self.coeffs.keys())
+
+        #first dependent variable should be the intercept
+        
+        int_term = dep_vars[0]
+        self.df['log_veh'] = self.coeffs[int_term]
+
+        #iterate over the remaining coefficients
+        for i in range (1, len(dep_vars)):
+            dep_var = dep_vars[i]
+            self.df['log_veh'] = self.df['log_veh'] + self.df[dep_var] * self.coeffs[dep_var]
+
+        #calculate the predicted household vehicle count
+        self.df['vehicles'] = self.df.apply(lambda row: int(round(math.exp(row.log_veh),0)), axis=1)
+
+        #print(self.df.loc[self.df['vehicles'] == 1].head())
+
+        #set the household vehicle flags
+        for i in range(len(self.veh_fields)):
+            veh_fld = self.veh_fields[i]
+
+            #initialize new column to zero
+            self.df[veh_fld] = 0
+            df2 = self.df.loc[self.df['vehicles'] == i]
+            if not(df2.empty):
+                if i < len(self.veh_fields) - 1:
+                    self.df[veh_fld] = self.df.apply(lambda row: 1 if row.vehicles == i else 0, axis=1)
+                else:
+                    self.df[veh_fld] = self.df.apply(lambda row: 1 if row.vehicles >= i else 0, axis=1)
+            
+
+        print(self.df.head(25))
 
 
 
