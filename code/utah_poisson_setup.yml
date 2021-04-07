@@ -2,6 +2,7 @@
 #Setup for application of Utah Poisson household vehicle count model to MAPC inputs
 #If aggregate output data is desired, set aggregate flag to yes and populate output_agg_file and output_agg_fields list
 #Otherwise set aggregate flag to no
+#veh_fields is a list of fields to hold flags for various household vehicle counts. Should be ordered from zero. Final field is for n+ vehicles
 
 working_dir: G:\Regional_Modeling\veh_ownership_model_app\code
 data_file_path: G:\Regional_Modeling\veh_ownership_model_app\test_data

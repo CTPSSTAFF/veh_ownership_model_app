@@ -60,19 +60,19 @@ class poisson_model(veh_model):
         for i in range (1,len(self.coeffs)):
             key = keys[i]
             if len(self.field_map) == 0:
-                #field map is empty: the column names and dependent variable names should be equivalent
+                #field map is empty: the column names and coefficient names should be equivalent
                 if key not in cols:
-                    msg = "Dependent variable '" + key + "' is not associated with a column in " + self.input_file + ".\n"
+                    msg = "Coefficient '" + key + "' is not associated with a column in " + self.input_file + ".\n"
                     raise RuntimeError(msg)
             else:
-                #get the column name associated with the dependent variable from the field map
+                #get the column name associated with the coefficient from the field map
                 try:
                     col  = self.field_map[key]
                 except Exception as err:
                     raise RuntimeError("Key '"  + key + "' not found in field map.") from err
 
                 if col not in cols:
-                    msg = "Dependent variable '" + key + "' is not associated with a column in " + self.input_file + ".\n"
+                    msg = "Coefficient '" + key + "' is not associated with a column in " + self.input_file + ".\n"
                     raise RuntimeError(msg)
 
     # method run_model:
@@ -80,35 +80,57 @@ class poisson_model(veh_model):
     # populate the new column by applying the coefficients in the model spec to the appropriate columns
     def run_model(self):
         print("running model...")
-        dep_vars = list(self.coeffs.keys())
 
-        #first dependent variable should be the intercept
-        
-        int_term = dep_vars[0]
-        self.df['log_veh'] = self.coeffs[int_term]
+        try:
+            #convert the coefficient keys from a dictionary view to a list so that we can reference them by position
+            coeff_names = list(self.coeffs.keys())
+
+            #set the log of the vehicle count equal to the first coefficient, which should be the intercept
+            int_term = coeff_names[0]
+            self.df['log_veh'] = self.coeffs[int_term]
+        except Exception as err:
+            #failure here is most likely because the load_data method has not been run and the dataframe doesn't exist
+            msg = "Unable to add a column to the input dataframe. Confirm that the load_data method is being executed before run_model.\n"
+            msg = msg + err.message
+            raise RuntimeError(msg)
 
         #iterate over the remaining coefficients
-        for i in range (1, len(dep_vars)):
-            dep_var = dep_vars[i]
-            self.df['log_veh'] = self.df['log_veh'] + self.df[dep_var] * self.coeffs[dep_var]
+        #add the product of the coefficient and its corresponding column value to the log of the vehicle count
+        try:
+            for i in range (1, len(coeff_names)):
+                coeff_name = coeff_names[i]
+                #if the field_map is empty, the data column names and coefficient names should match
+                if len(self.field_map) == 0:
+                    col_name = coeff_name
+                else:
+                    col_name = self.field_map[coeff_name]
+                
+                self.df['log_veh'] = self.df['log_veh'] + self.df[col_name] * self.coeffs[coeff_name]
 
-        #calculate the predicted household vehicle count
-        self.df['vehicles'] = self.df.apply(lambda row: int(round(math.exp(row.log_veh),0)), axis=1)
-
-        #print(self.df.loc[self.df['vehicles'] == 1].head())
+            #calculate the predicted household vehicle count
+            self.df['vehicles'] = self.df.apply(lambda row: int(round(math.exp(row.log_veh),0)), axis=1)
+        except Exception as err:
+            msg = "Error applying model coefficients.\n" + err.message
+            raise RuntimeError(msg)
 
         #set the household vehicle flags
-        for i in range(len(self.veh_fields)):
-            veh_fld = self.veh_fields[i]
+        try:
+            for i in range(len(self.veh_fields)):
+                veh_fld = self.veh_fields[i]
 
-            #initialize new column to zero
-            self.df[veh_fld] = 0
-            df2 = self.df.loc[self.df['vehicles'] == i]
-            if not(df2.empty):
-                if i < len(self.veh_fields) - 1:
-                    self.df[veh_fld] = self.df.apply(lambda row: 1 if row.vehicles == i else 0, axis=1)
-                else:
-                    self.df[veh_fld] = self.df.apply(lambda row: 1 if row.vehicles >= i else 0, axis=1)
+                #initialize new column to zero
+                self.df[veh_fld] = 0
+
+                #check to make sure at least one household has a vehicle count of i
+                #python is apparently unhappy when asked to run lambda functions on an empty dataframe
+                if not(self.df.loc[self.df['vehicles'] == i].empty):
+                    if i < len(self.veh_fields) - 1:
+                        self.df[veh_fld] = self.df.apply(lambda row: 1 if row.vehicles == i else 0, axis=1)
+                    else:
+                        self.df[veh_fld] = self.df.apply(lambda row: 1 if row.vehicles >= i else 0, axis=1)
+        except Exception as err:
+            msg = "Error setting household vehicle flags.\n" + err.message
+            raise RuntimeError(msg)
             
 
         print(self.df.head(25))
