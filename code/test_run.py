@@ -6,11 +6,21 @@ try:
     
     my_model = poisson_model("utah_poisson_setup.yml")
 
+    print("Loading data: " + strftime("%H:%M:%S", localtime()))
+
     my_model.load_data()
+
+    print("Running model: " + strftime("%H:%M:%S", localtime()))
 
     my_model.run_model()
 
+    print("Saving disaggregate data: " + strftime("%H:%M:%S", localtime()))
+
     my_model.save_results()
+
+    if my_model.aggregate:
+        print("Aggregating results: " + strftime("%H:%M:%S", localtime()))
+        my_model.aggregate_results()
 
     print("End: " + strftime("%H:%M:%S", localtime()))
 

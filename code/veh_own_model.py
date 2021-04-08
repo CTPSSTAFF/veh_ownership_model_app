@@ -33,7 +33,7 @@ class veh_model:
             self.input_file = self.setup['input_data_file']
             self.output_file = self.setup['output_disagg_file']
             self.aggregate = self.setup['aggregate']
-            if self.aggregate == "yes":
+            if self.aggregate:
                 self.output_agg_file = self.setup['output_agg_file']
                 self.agg_fields = self.setup['output_agg_fields']
             self.model_spec_file = self.setup['model_spec_file']
@@ -63,10 +63,33 @@ class veh_model:
     # Method save_results
     # write dataframe of processed household / zonal data to a csv file
     def save_results(self):
+        #print("writing dataframe to file...")
         try:
             outfilepath = self.data_path + "\\" + self.output_file
             self.df.to_csv(path_or_buf=outfilepath,index=False)
         except Exception as err:
             msg = "Error writing dataframe to file."
             raise RuntimeError(msg) from err
+
+    # Method aggregate_results
+    # Summarize dataframe of processed household / zonal data by aggregate geography
+    # Include fields in output_agg_fields list
+    def aggregate_results(self):
+        #print("aggregating results...")
+        try:
+            df2 = self.df[self.agg_fields]
+            df2_grouped = df2.groupby(self.agg_fields[0]).sum()
+        except Exception as err:
+            msg = "Error aggregating results"
+            print(err)
+            raise RuntimeError(msg) from err
+
+        #write the results to a text file
+        try:
+            outfilepath = self.data_path + "\\" + self.output_agg_file
+            df2_grouped.to_csv(path_or_buf=outfilepath)
+        except Exception as err:
+            msg = "Error writing aggregated output to file."
+            raise RuntimeError(msg) from err
+        
 

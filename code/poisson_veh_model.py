@@ -17,7 +17,7 @@ class poisson_model(veh_model):
 
     def __init__(self,
                  setup_file):
-        print("initializing...")
+        #print("initializing...")
         super().__init__(setup_file=setup_file)
 
         #parse the model specification file
@@ -43,10 +43,10 @@ class poisson_model(veh_model):
     # test1: keep just the first 1000 rows
     def load_data(self):
         #read the csv file into a dataframe and capture the column names in a list
-        print("loading input data...")
+        #print("loading input data...")
         try:
             infile = self.data_path + "\\" + self.input_file
-            self.df = pd.read_csv(infile)[0:100000]
+            self.df = pd.read_csv(infile)
             cols = self.df.columns
         except Exception as err:
             msg = "Error reading input file " + self.input_file + " into dataframe."
@@ -79,7 +79,7 @@ class poisson_model(veh_model):
     # add a column named 'log_veh' to the dataframe created by the load_data method
     # populate the new column by applying the coefficients in the model spec to the appropriate columns
     def run_model(self):
-        print("running model...")
+        #print("running model...")
 
         try:
             #convert the coefficient keys from a dictionary view to a list so that we can reference them by position
@@ -130,10 +130,7 @@ class poisson_model(veh_model):
         except Exception as err:
             msg = "Error setting household vehicle flags."
             raise RuntimeError(msg) from err
-            
 
-        print(self.df.head(15))
-        print(self.df.tail(10))
 
 
 
