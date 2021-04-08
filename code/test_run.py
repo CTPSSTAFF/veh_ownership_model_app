@@ -1,6 +1,9 @@
 from poisson_veh_model import poisson_model
+from time import localtime, strftime
 
 try:
+    print("Start: " + strftime("%H:%M:%S", localtime()))
+    
     my_model = poisson_model("utah_poisson_setup.yml")
 
     my_model.load_data()
@@ -8,6 +11,8 @@ try:
     my_model.run_model()
 
     my_model.save_results()
+
+    print("End: " + strftime("%H:%M:%S", localtime()))
 
 except Exception as err:
     print(err)

@@ -46,7 +46,7 @@ class poisson_model(veh_model):
         print("loading input data...")
         try:
             infile = self.data_path + "\\" + self.input_file
-            self.df = pd.read_csv(infile)[0:10000]
+            self.df = pd.read_csv(infile)[0:100000]
             cols = self.df.columns
         except Exception as err:
             msg = "Error reading input file " + self.input_file + " into dataframe."
@@ -132,7 +132,8 @@ class poisson_model(veh_model):
             raise RuntimeError(msg) from err
             
 
-        print(self.df.head(25))
+        print(self.df.head(15))
+        print(self.df.tail(10))
 
 
 
