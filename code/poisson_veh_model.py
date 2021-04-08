@@ -25,17 +25,17 @@ class poisson_model(veh_model):
             with open(self.model_spec_file, 'r') as stream:
                 self.specs = yaml.load(stream, Loader=yaml.FullLoader)
         except Exception as err:
-            msg = "Error reading model specification file (" + self.model_spec_file + ")\n" + err.message
+            msg = "Error reading model specification file (" + self.model_spec_file + ")."
             print(msg)
-            raise
+            raise RuntimeError(msg) from err
 
         try:
             self.field_map = self.specs['field_map']
             self.coeffs = self.specs['coeffs']
         except Exception as err:
-            msg = "Required model specification parameter(s) were not found in file '" + self.model_spec_file + "'\n" + err.message
+            msg = "Required model specification parameter(s) were not found in file '" + self.model_spec_file + "'."
             print(msg)
-            raise
+            raise RuntimeError(msg) from err
 
     # method load_data:
     # read input data file into a pandas dataframe
@@ -46,12 +46,12 @@ class poisson_model(veh_model):
         print("loading input data...")
         try:
             infile = self.data_path + "\\" + self.input_file
-            self.df = pd.read_csv(infile)[0:1000]
+            self.df = pd.read_csv(infile)[0:10000]
             cols = self.df.columns
         except Exception as err:
-            msg = "Error reading input file " + self.input_file + " into dataframe.\n" + err.message
+            msg = "Error reading input file " + self.input_file + " into dataframe."
             print(msg)
-            raise
+            raise RuntimeError(msg) from err
 
         #ensure that all model coefficients map to columns in the input dataframe
         #the first dependent variable is the intercept / constant - ignore it
@@ -90,9 +90,8 @@ class poisson_model(veh_model):
             self.df['log_veh'] = self.coeffs[int_term]
         except Exception as err:
             #failure here is most likely because the load_data method has not been run and the dataframe doesn't exist
-            msg = "Unable to add a column to the input dataframe. Confirm that the load_data method is being executed before run_model.\n"
-            msg = msg + err.message
-            raise RuntimeError(msg)
+            msg = "Unable to add a column to the input dataframe. Confirm that the load_data method is being executed before run_model."
+            raise RuntimeError(msg) from err
 
         #iterate over the remaining coefficients
         #add the product of the coefficient and its corresponding column value to the log of the vehicle count
@@ -110,8 +109,8 @@ class poisson_model(veh_model):
             #calculate the predicted household vehicle count
             self.df['vehicles'] = self.df.apply(lambda row: int(round(math.exp(row.log_veh),0)), axis=1)
         except Exception as err:
-            msg = "Error applying model coefficients.\n" + err.message
-            raise RuntimeError(msg)
+            msg = "Error applying model coefficients."
+            raise RuntimeError(msg) from err
 
         #set the household vehicle flags
         try:
@@ -129,8 +128,8 @@ class poisson_model(veh_model):
                     else:
                         self.df[veh_fld] = self.df.apply(lambda row: 1 if row.vehicles >= i else 0, axis=1)
         except Exception as err:
-            msg = "Error setting household vehicle flags.\n" + err.message
-            raise RuntimeError(msg)
+            msg = "Error setting household vehicle flags."
+            raise RuntimeError(msg) from err
             
 
         print(self.df.head(25))

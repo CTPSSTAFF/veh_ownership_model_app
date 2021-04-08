@@ -21,9 +21,9 @@ class veh_model:
             with open(setup_file, 'r') as stream:    
                 setup = yaml.load(stream, Loader=yaml.FullLoader)
         except Exception as err:
-            msg = "Error reading setup file (" + setup_file + ")\n" + err.message
+            msg = "Error reading setup file (" + setup_file + ")."
             print(msg)
-            raise
+            raise RuntimeError(msg) from err
         
         self.setup = setup if setup is not None else {}
 
@@ -39,9 +39,9 @@ class veh_model:
             self.model_spec_file = self.setup['model_spec_file']
             self.veh_fields = self.setup['veh_fields']
         except Exception as err:
-            msg = "Required setup parameter(s) were not found in file '" + setup_file + "'\n" + err.message
+            msg = "Required setup parameter(s) were not found in file '" + setup_file + "."
             print(msg)
-            raise
+            raise RuntimeError(msg) from err
 
     # Method load_data should be defined by subclasses of veh_model
     # The base class method functionality is limited to raising a NotImplementedError with a helpful message
@@ -59,4 +59,14 @@ class veh_model:
     def run_model(self):
         msg = "Error: Method run_model is undefined."
         raise NotImplementedError(msg)
+
+    # Method save_results
+    # write dataframe of processed household / zonal data to a csv file
+    def save_results(self):
+        try:
+            outfilepath = self.data_path + "\\" + self.output_file
+            self.df.to_csv(path_or_buf=outfilepath,index=False)
+        except Exception as err:
+            msg = "Error writing dataframe to file."
+            raise RuntimeError(msg) from err
 

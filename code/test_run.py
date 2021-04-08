@@ -7,5 +7,7 @@ try:
 
     my_model.run_model()
 
+    my_model.save_results()
+
 except Exception as err:
     print(err)
