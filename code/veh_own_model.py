@@ -36,7 +36,7 @@ class veh_model:
             if self.aggregate:
                 self.output_agg_file = self.setup['output_agg_file']
                 self.agg_fields = self.setup['output_agg_fields']
-            self.model_spec_file = self.setup['model_spec_file']
+            self.model_spec_file = self.working_dir + "\\" + self.setup['model_spec_file']
             self.veh_fields = self.setup['veh_fields']
         except Exception as err:
             msg = "Required setup parameter(s) were not found in file '" + setup_file + "."

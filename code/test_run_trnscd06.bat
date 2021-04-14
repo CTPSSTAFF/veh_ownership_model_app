@@ -7,6 +7,4 @@ rem redwagon
 rem c:\users\paul\AppData\Local\Continuum\anaconda3\condabin\activate va_model && python test_run.py
 
 rem trnscd06
-c:\ProgramData\Anaconda3\condabin\activate va_model && c:\Users\phoebe\.conda\envs\va_model\python test_run.py
-
-timeout /t 30
+c:\ProgramData\Anaconda3\condabin\activate va_model && python D:\Projects\veh_ownership_model_app\code\test_run_trnscd06.py & timeout /t 30
