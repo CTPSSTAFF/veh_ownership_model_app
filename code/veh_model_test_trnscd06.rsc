@@ -9,9 +9,9 @@ Macro "Veh_Model_Test"
     end
 
     ret = RunProgram("D:\\Projects\\veh_ownership_model_app\\code\\test_run_trnscd06.bat", {{"Maximize", "True"}})
-    Pause(5000)
+    Pause(1000)
 
-    ShowMessage("Return code = " + ret)
+    ShowMessage("VA model application completed with return code = " + i2s(ret) + ".")
     ok = 1
     quit:
     return(ok)
