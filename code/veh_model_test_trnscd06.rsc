@@ -11,7 +11,7 @@ Macro "Veh_Model_Test"
     ret = RunProgram("D:\\Projects\\veh_ownership_model_app\\code\\test_run_trnscd06.bat", {{"Maximize", "True"}})
     Pause(5000)
 
-    ShowMessage("Return code = " + Ret)
+    ShowMessage("Return code = " + ret)
     ok = 1
     quit:
     return(ok)
