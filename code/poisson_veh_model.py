@@ -1,11 +1,10 @@
 import pandas as pd
-#import numpy as np
 import yaml
 import os
 import math
-from veh_own_model import veh_model
+from veh_own_model import VehModel
 
-class poisson_model(veh_model):
+class PoissonModel(VehModel):
     """
     Defines an implementation of a poisson count model for estimating household vehicles
 
@@ -31,7 +30,7 @@ class poisson_model(veh_model):
 
         try:
             self.field_map = self.specs['field_map']
-            self.coeffs = self.specs['coeffs']
+            self.coeffs    = self.specs['coeffs']
         except Exception as err:
             msg = "Required model specification parameter(s) were not found in file '" + self.model_spec_file + "'."
             print(msg)
@@ -45,9 +44,9 @@ class poisson_model(veh_model):
         #read the csv file into a dataframe and capture the column names in a list
         #print("loading input data...")
         try:
-            infile = self.data_path + "\\" + self.input_file
+            infile  = self.data_path + "\\" + self.input_file
             self.df = pd.read_csv(infile)
-            cols = self.df.columns
+            cols    = self.df.columns
         except Exception as err:
             msg = "Error reading input file " + self.input_file + " into dataframe."
             print(msg)
@@ -57,6 +56,9 @@ class poisson_model(veh_model):
         #the first dependent variable is the intercept / constant - ignore it
 
         keys = list(self.coeffs.keys())
+
+        #require that first coefficient is named 'intercept'
+        #then test here to make sure it exists
         for i in range (1,len(self.coeffs)):
             key = keys[i]
             if len(self.field_map) == 0:
@@ -130,21 +132,3 @@ class poisson_model(veh_model):
         except Exception as err:
             msg = "Error setting household vehicle flags."
             raise RuntimeError(msg) from err
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    
