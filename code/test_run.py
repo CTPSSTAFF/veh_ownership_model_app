@@ -1,11 +1,11 @@
-from poisson_veh_model import poisson_model
+from poisson_veh_model import PoissonModel
 from time import localtime, strftime
 
 try:
     print("Start: " + strftime("%H:%M:%S", localtime()))
     
     #Note: in order to execute model application from a TransCAD macro, the full path to the setup file must be specified
-    my_model = poisson_model("D:\\Projects\\veh_ownership_model_app\\code\\utah_poisson_setup.yml")
+    my_model = PoissonModel("D:\\Projects\\veh_ownership_model_app\\code\\utah_poisson_setup.yml")
 
     print("Loading data: " + strftime("%H:%M:%S", localtime()))
 
