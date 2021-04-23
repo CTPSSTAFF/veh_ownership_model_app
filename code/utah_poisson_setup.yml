@@ -4,8 +4,8 @@
 #Otherwise set aggregate flag to no
 #veh_fields is a list of fields to hold flags for various household vehicle counts. Should be ordered from zero. Final field is for n+ vehicles
 
-working_dir: D:Projects\veh_ownership_model_app\code
-data_file_path: G:\Regional_Modeling\veh_ownership_model_app\test_data
+working_dir: D:\Projects\veh_ownership_model_app\code
+data_file_path: D:\Projects\veh_ownership_model_app\test_data
 input_data_file: veh_ownership_model_RHS_2040.csv
 aggregate: yes
 output_disagg_file: veh_ownership_model_out_2040.csv
