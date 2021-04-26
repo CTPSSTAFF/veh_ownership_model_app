@@ -1,16 +1,15 @@
 import pandas as pd
-#import numpy as np
 import yaml
 import os
 
-class veh_model:
+class VehModel:
     """
     A base class defining functionality common to any vehicle ownership model being applied.
     Also provides placeholder methods for functionality that should be defined in subclasses
     that implement specific model types.
 
     Args:
-        setup_file (str): name of YAML file listing the folder path of the working directory,
+        setup_file (str): name of YAML file listing the folder path of the code directory,
         names of input and output files,the name of the model specification file,
         lists of required fields for output files and the name of the model specification yaml file 
     """
@@ -28,16 +27,16 @@ class veh_model:
         self.setup = setup if setup is not None else {}
 
         try:
-            self.working_dir = self.setup['working_dir']
-            self.data_path = self.setup['data_file_path']
-            self.input_file = self.setup['input_data_file']
+            self.code_path   = self.setup['code_path']
+            self.data_path   = self.setup['data_file_path']
+            self.input_file  = self.setup['input_data_file']
             self.output_file = self.setup['output_disagg_file']
-            self.aggregate = self.setup['aggregate']
+            self.aggregate   = self.setup['aggregate']
             if self.aggregate:
                 self.output_agg_file = self.setup['output_agg_file']
-                self.agg_fields = self.setup['output_agg_fields']
-            self.model_spec_file = self.working_dir + "\\" + self.setup['model_spec_file']
-            self.veh_fields = self.setup['veh_fields']
+                self.agg_fields      = self.setup['output_agg_fields']
+            self.model_spec_file = self.code_path + "\\" + self.setup['model_spec_file']
+            self.veh_fields      = self.setup['veh_fields']
         except Exception as err:
             msg = "Required setup parameter(s) were not found in file '" + setup_file + "."
             print(msg)
@@ -65,8 +64,8 @@ class veh_model:
     def save_results(self):
         #print("writing dataframe to file...")
         try:
-            outfilepath = self.data_path + "\\" + self.output_file
-            self.df.to_csv(path_or_buf=outfilepath,index=False)
+            out_file_path = self.data_path + "\\" + self.output_file
+            self.df.to_csv(path_or_buf=out_file_path,index=False)
         except Exception as err:
             msg = "Error writing dataframe to file."
             raise RuntimeError(msg) from err
@@ -77,7 +76,7 @@ class veh_model:
     def aggregate_results(self):
         #print("aggregating results...")
         try:
-            df2 = self.df[self.agg_fields]
+            df2         = self.df[self.agg_fields]
             df2_grouped = df2.groupby(self.agg_fields[0]).sum()
         except Exception as err:
             msg = "Error aggregating results"
@@ -86,10 +85,8 @@ class veh_model:
 
         #write the results to a text file
         try:
-            outfilepath = self.data_path + "\\" + self.output_agg_file
-            df2_grouped.to_csv(path_or_buf=outfilepath)
+            out_file_path = self.data_path + "\\" + self.output_agg_file
+            df2_grouped.to_csv(path_or_buf=out_file_path)
         except Exception as err:
             msg = "Error writing aggregated output to file."
             raise RuntimeError(msg) from err
-        
-
