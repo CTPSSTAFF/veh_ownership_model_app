@@ -9,3 +9,4 @@
 *.json
 *.xlsx
 *.xls
+/omx_test   
