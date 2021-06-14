@@ -81,11 +81,8 @@ Macro "export_skims"
 
     //add a new core to hold the composite skim and create matrix currencies for all cores
     AddMatrixCore(mat, "CongTime")
-    //sov_am_mc = CreateMatrixCurrency(mat, "AM_CongTime", "mapcZ", "mapcZ",)
-    //sov_pm_mc = CreateMatrixCurrency(mat, "PM_CongTime", "mapcZ", "mapcZ",)
     sov_out_mc = CreateMatrixCurrency(mat, "CongTime", "mapcZ", "mapcZ",)
-    //FillMatrix(sov_out_mc,,,{"Copy", 0},)
-
+    
     Opts = Null
     Opts.Input.[Matrix Currency] = {temp_sov_skim_mtx, "CongTime", "mapcZ", "mapcZ"}
     Opts.Global.Method = 11 //formula
@@ -95,6 +92,7 @@ Macro "export_skims"
     ret = RunMacro("TCB Run Operation", "Fill Matrices", Opts, &list)
 
     //Copy the composite SOV skim matrix to an omx file
+    //Note: CopyMatrix will copy all cores even though we specify just one
     sov_out_mat = CopyMatrix(sov_out_mc, 
         {{"File Name", out_sov_skim_omx},
         {"Label", "SOV"},
@@ -128,8 +126,7 @@ Macro "export_skims"
     //add a new core to hold the composite skim and create matrix currencies for all cores
     AddMatrixCore(mat, "TotalTime")
     transit_out_mc = CreateMatrixCurrency(mat, "TotalTime", "mapcZ", "mapcZ",)
-    //FillMatrix(sov_out_mc,,,{"Copy", 0},)
-
+    
     Opts = Null
     Opts.Input.[Matrix Currency] = {temp_transit_skim_mtx, "TotalTime", "mapcZ", "mapcZ"}
     Opts.Global.Method = 11 //formula
@@ -138,13 +135,15 @@ Macro "export_skims"
     Opts.Global.[Force Missing] = "No"
     ret = RunMacro("TCB Run Operation", "Fill Matrices", Opts, &list)
 
-    //Copy the composite transit skim matrix to an omx file
+    //Copy the skim matrix to an omx file
+    //Note: CopyMatrix will copy all cores even though we specify just one
     sov_out_mat = CopyMatrix(transit_out_mc, 
         {{"File Name", out_transit_skim_omx},
         {"Label", "SOV"},
         {"File Based", "Yes"},
         {"OMX", "True"}
     })
+
     
     ok = 1
     quit:
