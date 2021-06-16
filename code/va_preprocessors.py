@@ -107,7 +107,7 @@ class va_preprocess:
         #iterate over the sov travel time thresholds
         for time in self.sov_times:
             #create an array of 0/1 flags based on whether o-d travel time is within threshold
-            flag_arr = np.where(sov_arr<=time,1,0)
+            flag_arr = np.where(sov_arr==0,0,(np.where(sov_arr<=time,1,0)))
             #multiply the flags by the destination zone employment
             #we need to transpose the flag array first, then transpose the result
             od_emp_arr = ((flag_arr.T) * emp_arr).T
@@ -127,7 +127,7 @@ class va_preprocess:
         #iterate over the transit travel time thresholds
         for time in self.transit_times:
             #create an array of 0/1 flags based on whether o-d travel time is within threshold
-            flag_arr = np.where(transit_arr<=time,1,0)
+            flag_arr = np.where(transit_arr==0,0,(np.where(transit_arr<=time,1,0)))
             #multiply the flags by the destination zone employment
             #we need to transpose the flag array first, then transpose the result
             od_emp_arr = ((flag_arr.T) * emp_arr).T
