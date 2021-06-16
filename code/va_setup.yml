@@ -1,0 +1,22 @@
+# Provide file names, folder paths and other required settings 
+# for pre- and post-processor scripts supporting
+# the application of a vehicle ownership model
+
+#emp_accessibility_by_taz
+  in_folder: D:\Projects\veh_ownership_model_app\test_data
+  out_folder: D:\Projects\veh_ownership_model_app\test_data
+  sov_skim_file: sov_skim.omx
+  sov_skim_name: "CongTime"
+  transit_skim_file: transit_skim.omx
+  transit_skim_name: "TotalTime"
+  skim_index: "mapcZ"
+
+  #employment file should have TAZ# in first column and total employment in second column
+  taz_emp_file: emp_taz.csv
+  emp_cols: ["ID", "Tot_Emp", "Srv_Emp", "Ret_Emp", "Bas_Emp"]
+  emp_access_file: emp_access_taz.csv
+
+  #travel time thresholds for employment accessibility metrics
+  sov_times: [10, 20, 30]
+  transit_times: [30]
+
