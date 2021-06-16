@@ -100,7 +100,11 @@ Macro "export_skims"
         {"OMX", "True"}
     })
 
-    //Calculate average total travel time time by adding, cell by cell, the am and pm 
+    mapc_idx = Null
+    sov_out_mc = Null 
+    mat = Null 
+
+    //Calculate average total transit travel time time by adding, cell by cell, the am and pm 
     //IVTT and OVTT matrix currencies
     //and dividing the result by 2 (multiply by 0.5)
     mat = CombineMatrices(
@@ -137,13 +141,20 @@ Macro "export_skims"
 
     //Copy the skim matrix to an omx file
     //Note: CopyMatrix will copy all cores even though we specify just one
-    sov_out_mat = CopyMatrix(transit_out_mc, 
+    transit_out_mat = CopyMatrix(transit_out_mc, 
         {{"File Name", out_transit_skim_omx},
         {"Label", "SOV"},
         {"File Based", "Yes"},
         {"OMX", "True"}
     })
 
+    mapc_idx = Null
+    transit_out_mc = Null 
+    mat = Null
+
+    ret = RunMacro("G30 File Close All")
+    DeleteFile(temp_sov_skim_mtx)
+    DeleteFile(temp_transit_skim_mtx)
     
     ok = 1
     quit:
