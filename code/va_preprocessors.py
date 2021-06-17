@@ -251,8 +251,11 @@ class va_preprocess:
         #read the EPA smart location data into a pandas dataframe
         try:
             infile = self.in_folder + "\\" + self.smart_loc_file
-            df_int_den_bg = pd.read_csv(filepath_or_buffer=infile, header=0, index_col=None, \
-                            usecols=['GEOID10','D3b','D3bao','D3bmm3','D3bmm4','D3bpo3','D3bpo4'])
+            #use a filter to grab only Massachusetts records
+            iter_csv = pd.read_csv(infile, iterator=True, chunksize=1000, \
+                                   usecols=['SFIPS','GEOID10','D3b','D3bao','D3bmm3','D3bmm4','D3bpo3','D3bpo4'])
+            df_int_den_bg = pd.concat([chunk[chunk['SFIPS']==25] for chunk in iter_csv])
+            
         except Exception as err:
             msg = "Error reading EPA smart location file " + self.smart_loc_file + " into dataframe."
             print(msg)
@@ -268,6 +271,12 @@ class va_preprocess:
         #write the intersection density data to a csv file
         out_file_path = self.out_folder + "\\" + self.int_den_file
         df_int_den_bg.to_csv(path_or_buf=out_file_path, index = False)
+
+    #--------------------------------------------------------------------------------------------------
+    #def assemble_va_inputs(self):
+        #
+
+    
                                                                                                     
             
             
