@@ -43,9 +43,20 @@ class va_preprocess:
             self.transit_skim_name = self.setup['transit_skim_name']
             self.skim_index = self.setup['skim_index']
             
+            self.urbansim_file = self.setup['urbansim_file']
+            self.gq_pop_file = self.setup['gq_pop_file']
+            self.landarea_file = self.setup['landarea_file']
+            self.blk_fct_file = self.setup['blk_fct_file']
+            self.act_den_file = self.setup['act_den_file']
+
+            self.smart_loc_file = self.setup['smart_loc_file']
+            self.int_den_file = self.setup['int_den_file']
+
         except Exception as err:
             msg = "Required setup parameter(s) were not found in file '" + setup_file + "'."
             raise RuntimeError(msg) from err
+
+    #--------------------------------------------------------------------------------------------------
 
     def emp_accessibility_by_taz(self):
         #read the sov congested time matrix into an array
@@ -147,19 +158,119 @@ class va_preprocess:
         #write the employment accessibility metrics to a csv file
         out_file_path = self.out_folder + "\\" + self.emp_access_file
         emp_access_df.to_csv(path_or_buf=out_file_path, index = False)
-            
-        
-            
-            
 
-        
+    #-------------------------------------------------------------------------------------------------
 
-        
+    def activity_den_by_taz(self):
+        #read the urbansim household data into a pandas dataframe. Use an iterator to filter on input
+        try:
+            infile = self.in_folder + "\\" + self.urbansim_file
+            iter_csv = pd.read_csv(infile, iterator=True, chunksize=1000)
+            df_usim = pd.concat([chunk[chunk['person_num']==1] for chunk in iter_csv])
+            #get rid of unnecessary columns
+            df_usim = df_usim[['block_id','persons']]
+        except Exception as err:
+            msg = "Error reading urbansim file " + self.urbansim_file + "into dataframe."
+            print(msg)
+            raise RuntimeError(msg) from error
 
+        #read the taz / block split lookup into a dataframe
+        try:
+            infile = self.in_folder + "\\" + self.blk_fct_file
+            df_blk_taz_lut = pd.read_csv(filepath_or_buffer=infile, header=0, index_col=None)
+            df_blk_taz_lut = df_blk_taz_lut[['block_id', 'taz', 'area_fct']]
+        except Exception as err:
+            msg = "Error reading block / taz lookup file " + self.blk_fct_file + "into dataframe."
+            print(msg)
+            raise RuntimeError(msg) from error
 
-        
-        
+        #Merge the urbansim and taz lookup dataframes and calculate household pop by taz
+        df_usim = pd.merge(df_usim, df_blk_taz_lut, on=["block_id", "block_id"])
+        df_usim['hh_pop'] = df_usim['persons'] * df_usim['area_fct']
+        df_usim = df_usim[['taz','hh_pop']]
 
+        df_hh_pop_taz = df_usim.groupby('taz').sum()
+
+        #read the group quarters population file into a dataframe
+        try:
+            infile = self.in_folder + "\\" + self.gq_pop_file
+            df_gq_pop_taz = pd.read_csv(filepath_or_buffer=infile, header=0, index_col=None)
+        except Exception as err:
+            msg = "Error reading group quarters population file " + self.gq_pop_file + " into dataframe."
+            print(msg)
+            raise RuntimeError(err)
+        
+        #read the employment by taz file into a dataframe
+        try:
+            infile = self.in_folder + "\\" + self.taz_emp_file
+            df_emp_taz = pd.read_csv(filepath_or_buffer=infile, header=0, index_col=None, usecols=[0,1])
+            df_emp_taz.columns = ['taz','emp']
+        except Exception as err:
+            msg = "Error reading employment file " + self.taz_emp_file + " into dataframe."
+            print(msg)
+            raise RuntimeError(err)
+
+        #read the land area by taz file into a dataframe
+        try:
+            infile = self.in_folder + "\\" + self.landarea_file
+            df_area_taz = pd.read_csv(filepath_or_buffer=infile, header=0, index_col=None, usecols=[0,1])
+            df_area_taz.columns = ['taz', 'land_area']
+        except Exception as err:
+            msg = "Error reading land area file " + self.landarea_file + " into dataframe."
+            print(msg)
+            raise RuntimeError(err)
+
+        #merge the population, employment and land area dataframes
+        df_act_den_taz = pd.merge(df_hh_pop_taz, df_gq_pop_taz, on=["taz","taz"])
+        df_act_den_taz = pd.merge(df_act_den_taz, df_emp_taz, on=["taz","taz"])
+        df_act_den_taz = pd.merge(df_act_den_taz, df_area_taz, on=["taz","taz"])
+        df_act_den_taz["act_den"] = \
+            ((df_act_den_taz["hh_pop"] + df_act_den_taz["gq_pop"] + df_act_den_taz["emp"]) / 1000) / df_act_den_taz["land_area"]
+        df_act_den_taz["job_pop_bal"] = \
+            df_act_den_taz.apply(lambda row: self.jp_bal(row['emp'], row['hh_pop'], row['gq_pop']), axis=1)
+        
+        #drop unnecessary columns
+        df_act_den_taz = df_act_den_taz[['taz','act_den','job_pop_bal']]
+
+        #write the activity density data to a csv file
+        out_file_path = self.out_folder + "\\" + self.act_den_file
+        df_act_den_taz.to_csv(path_or_buf=out_file_path, index = False)
     
-        
+    #-------------------------------------------------------------------------------------
+    def jp_bal(self, emp, hhpop, gqpop):
+        #calculate job / population balance metric
+        if emp==0 and hhpop==0 and gqpop==0:
+            jpb = 0
+        else:
+            jpb = 1 - (abs(emp - 0.2 * (hhpop + gqpop)) / (emp + 0.2 * (hhpop + gqpop)))
 
+        return jpb
+
+    #--------------------------------------------------------------------------------------------
+    def int_den_by_bg(self):
+        #read the EPA smart location data into a pandas dataframe
+        try:
+            infile = self.in_folder + "\\" + self.smart_loc_file
+            df_int_den_bg = pd.read_csv(filepath_or_buffer=infile, header=0, index_col=None, \
+                            usecols=['GEOID10','D3b','D3bao','D3bmm3','D3bmm4','D3bpo3','D3bpo4'])
+        except Exception as err:
+            msg = "Error reading EPA smart location file " + self.smart_loc_file + " into dataframe."
+            print(msg)
+            raise RuntimeError(err)
+        df_int_den_bg['intden'] = df_int_den_bg['D3bao'] + df_int_den_bg['D3bmm3'] + \
+                                    df_int_den_bg['D3bmm4'] + df_int_den_bg['D3bpo3'] + df_int_den_bg['D3bpo4']
+        df_int_den_bg['pct4way'] = df_int_den_bg['D3bmm4'] + df_int_den_bg['D3bpo4']
+
+        #drop unnecessary columns and rename the block group id column to match UrbanSim
+        df_int_den_bg = df_int_den_bg[['GEOID10','intden','pct4way']]
+        df_int_den_bg.columns = ['blockgroup_id','intden','pct4way']
+
+        #write the intersection density data to a csv file
+        out_file_path = self.out_folder + "\\" + self.int_den_file
+        df_int_den_bg.to_csv(path_or_buf=out_file_path, index = False)
+                                                                                                    
+            
+            
+
+        
+        

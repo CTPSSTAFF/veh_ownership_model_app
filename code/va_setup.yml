@@ -2,9 +2,11 @@
 # for pre- and post-processor scripts supporting
 # the application of a vehicle ownership model
 
-#emp_accessibility_by_taz
+#file folders
   in_folder: D:\Projects\veh_ownership_model_app\test_data
   out_folder: D:\Projects\veh_ownership_model_app\test_data
+  
+#employment accessibility by taz
   sov_skim_file: sov_skim.omx
   sov_skim_name: "CongTime"
   transit_skim_file: transit_skim.omx
@@ -19,4 +21,16 @@
   #travel time thresholds for employment accessibility metrics
   sov_times: [10, 20, 30]
   transit_times: [30]
+
+#activity density 
+  urbansim_file: urbansim_run_35_microhouseholds_brief2040.csv
+  gq_pop_file: gq_pop10_taz.csv
+  landarea_file: sw_taz_land_area.csv
+  blk_fct_file: block10_taz_split.csv
+  act_den_file: activity_den_taz.csv
+
+#intersection density
+  smart_loc_file: smart_location_database.csv
+  int_den_file: intersection_den_bg.csv
+
 
