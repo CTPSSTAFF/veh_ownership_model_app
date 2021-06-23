@@ -15,6 +15,10 @@ try:
 
     my_model.run_model()
 
+    print("Factoring block data to taz: " + strftime("%H:%M:%S", localtime()))
+
+    my_model.split_hh_to_taz()
+
     print("Saving disaggregate data: " + strftime("%H:%M:%S", localtime()))
 
     my_model.save_results()
