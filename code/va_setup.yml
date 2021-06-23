@@ -19,7 +19,7 @@
   emp_access_file: emp_access_taz.csv
 
   #travel time thresholds for employment accessibility metrics
-  sov_times: [10, 20, 30]
+  sov_times: [10, 30]
   transit_times: [30]
 
 #activity density 
@@ -32,5 +32,12 @@
 #intersection density
   smart_loc_file: smart_location_database.csv
   int_den_file: intersection_den_bg.csv
+
+#assemble va input file
+  blk_lut_file: block10_taz_whole.csv
+  va_input_file: veh_ownership_model_RHS_2040.csv
+  usim_fields: ['HhId','blockgroup_id','block_id','persons','workers','hhinc2010']
+  hhsize_fields: ['hhsize_cat1','hhsize_cat2','hhsize_cat3','hhsize_cat4','hhsize_cat5']
+  numwrk_fields: ['employed_cat0','employed_cat1','employed_cat2','employed_cat3']
 
 

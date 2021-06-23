@@ -23,7 +23,6 @@ class va_preprocess:
                 setup = yaml.load(stream, Loader= yaml.FullLoader)
         except Exception as err:
             msg = "Error reading setup file (" + setup_file + ")."
-            print(msg)
             raise RuntimeError(msg) from err
 
         self.setup = setup if setup is not None else {}
@@ -52,6 +51,12 @@ class va_preprocess:
             self.smart_loc_file = self.setup['smart_loc_file']
             self.int_den_file = self.setup['int_den_file']
 
+            self.blk_lut_file = self.setup['blk_lut_file']
+            self.va_input_file = self.setup['va_input_file']
+            self.usim_fields = self.setup['usim_fields']
+            self.hhsize_fields = self.setup['hhsize_fields']
+            self.numwrk_fields = self.setup['numwrk_fields']
+
         except Exception as err:
             msg = "Required setup parameter(s) were not found in file '" + setup_file + "'."
             raise RuntimeError(msg) from err
@@ -72,7 +77,6 @@ class va_preprocess:
             
         except Exception as err:
             msg = "Error reading SOV skim matrix " + self.sov_skim_file + "."
-            print(msg)
             raise RuntimeError(msg) from err
 
         #read the transit travel time matrix into an arr
@@ -82,7 +86,6 @@ class va_preprocess:
             transit_arr = np.array(transit_mtx)
         except Exception as err:
             msg = "Error reading transit skim matrix " + self.transit_skim_file + "."
-            print(msg)
             raise RuntimeError(msg) from err
         
         #create a dataframe from the taz mapping keys, with the taz mapping values as the index
@@ -95,13 +98,12 @@ class va_preprocess:
             emp_df = pd.read_csv(filepath_or_buffer=infile, header=0, index_col=None, usecols=[0,1])
         except Exception as err:
             msg = "Error reading input file " + self.taz_emp_file + " into dataframe."
-            print(msg)
             raise RuntimeError(msg) from err
 
         #Merge the taz map and employment dataframes on the taz column
         #performing an outer join and retaining each row from the taz map.
         #The resulting dataframe will contain employment counts for each TAZ present in the skim matrices.
-        emp_df2 = pd.merge(taz_map_df, emp_df, how="left", on=["ID",self.emp_cols[0]])
+        emp_df2 = pd.merge(taz_map_df, emp_df, how="left", left_on="ID", right_on=self.emp_cols[0])
         #drop the TAZ column from the dataframe
         emp_df2 = emp_df2[self.emp_cols[1]]
 
@@ -131,9 +133,9 @@ class va_preprocess:
             #transpose the array
             o_emp_arr4 = o_emp_arr3.T
             #convert the array to a dataframe
-            o_emp_df = pd.DataFrame(o_emp_arr4, columns=['ID', 'sov_pct'+str(time)])
+            o_emp_df = pd.DataFrame(o_emp_arr4, columns=['ID', 'pctemp'+str(time)+'a'])
             #merge the dataframe into the emp_access_df dataframe
-            emp_access_df = pd.merge(emp_access_df, o_emp_df, how="left", on=["ID","ID"])
+            emp_access_df = pd.merge(emp_access_df, o_emp_df, how="left", left_on="ID", right_on="ID")
 
         #iterate over the transit travel time thresholds
         for time in self.transit_times:
@@ -151,9 +153,9 @@ class va_preprocess:
             #transpose the array
             o_emp_arr4 = o_emp_arr3.T
             #convert the array to a dataframe
-            o_emp_df = pd.DataFrame(o_emp_arr4, columns=['ID', 'transit_pct'+str(time)])
+            o_emp_df = pd.DataFrame(o_emp_arr4, columns=['ID', 'pctemp'+str(time)+'t'])
             #merge the dataframe into the emp_access_df dataframe
-            emp_access_df = pd.merge(emp_access_df, o_emp_df, how="left", on=["ID","ID"])
+            emp_access_df = pd.merge(emp_access_df, o_emp_df, how="left", left_on="ID", right_on="ID")
 
         #write the employment accessibility metrics to a csv file
         out_file_path = self.out_folder + "\\" + self.emp_access_file
@@ -171,8 +173,7 @@ class va_preprocess:
             df_usim = df_usim[['block_id','persons']]
         except Exception as err:
             msg = "Error reading urbansim file " + self.urbansim_file + "into dataframe."
-            print(msg)
-            raise RuntimeError(msg) from error
+            raise RuntimeError(msg) from err
 
         #read the taz / block split lookup into a dataframe
         try:
@@ -181,11 +182,10 @@ class va_preprocess:
             df_blk_taz_lut = df_blk_taz_lut[['block_id', 'taz', 'area_fct']]
         except Exception as err:
             msg = "Error reading block / taz lookup file " + self.blk_fct_file + "into dataframe."
-            print(msg)
-            raise RuntimeError(msg) from error
+            raise RuntimeError(msg) from err
 
         #Merge the urbansim and taz lookup dataframes and calculate household pop by taz
-        df_usim = pd.merge(df_usim, df_blk_taz_lut, on=["block_id", "block_id"])
+        df_usim = pd.merge(df_usim, df_blk_taz_lut, left_on="block_id", right_on="block_id")
         df_usim['hh_pop'] = df_usim['persons'] * df_usim['area_fct']
         df_usim = df_usim[['taz','hh_pop']]
 
@@ -197,8 +197,7 @@ class va_preprocess:
             df_gq_pop_taz = pd.read_csv(filepath_or_buffer=infile, header=0, index_col=None)
         except Exception as err:
             msg = "Error reading group quarters population file " + self.gq_pop_file + " into dataframe."
-            print(msg)
-            raise RuntimeError(err)
+            raise RuntimeError(msg) from err
         
         #read the employment by taz file into a dataframe
         try:
@@ -207,8 +206,7 @@ class va_preprocess:
             df_emp_taz.columns = ['taz','emp']
         except Exception as err:
             msg = "Error reading employment file " + self.taz_emp_file + " into dataframe."
-            print(msg)
-            raise RuntimeError(err)
+            raise RuntimeError(msg) from err
 
         #read the land area by taz file into a dataframe
         try:
@@ -217,20 +215,19 @@ class va_preprocess:
             df_area_taz.columns = ['taz', 'land_area']
         except Exception as err:
             msg = "Error reading land area file " + self.landarea_file + " into dataframe."
-            print(msg)
-            raise RuntimeError(err)
+            raise RuntimeError(msg) from err
 
         #merge the population, employment and land area dataframes
-        df_act_den_taz = pd.merge(df_hh_pop_taz, df_gq_pop_taz, on=["taz","taz"])
-        df_act_den_taz = pd.merge(df_act_den_taz, df_emp_taz, on=["taz","taz"])
-        df_act_den_taz = pd.merge(df_act_den_taz, df_area_taz, on=["taz","taz"])
-        df_act_den_taz["act_den"] = \
+        df_act_den_taz = pd.merge(df_hh_pop_taz, df_gq_pop_taz, left_on="taz", right_on="taz")
+        df_act_den_taz = pd.merge(df_act_den_taz, df_emp_taz, left_on="taz", right_on="taz")
+        df_act_den_taz = pd.merge(df_act_den_taz, df_area_taz, left_on="taz", right_on="taz")
+        df_act_den_taz["actden"] = \
             ((df_act_den_taz["hh_pop"] + df_act_den_taz["gq_pop"] + df_act_den_taz["emp"]) / 1000) / df_act_den_taz["land_area"]
-        df_act_den_taz["job_pop_bal"] = \
+        df_act_den_taz["jobpop"] = \
             df_act_den_taz.apply(lambda row: self.jp_bal(row['emp'], row['hh_pop'], row['gq_pop']), axis=1)
         
         #drop unnecessary columns
-        df_act_den_taz = df_act_den_taz[['taz','act_den','job_pop_bal']]
+        df_act_den_taz = df_act_den_taz[['taz','actden','jobpop']]
 
         #write the activity density data to a csv file
         out_file_path = self.out_folder + "\\" + self.act_den_file
@@ -258,8 +255,7 @@ class va_preprocess:
             
         except Exception as err:
             msg = "Error reading EPA smart location file " + self.smart_loc_file + " into dataframe."
-            print(msg)
-            raise RuntimeError(err)
+            raise RuntimeError(msg) from err
         df_int_den_bg['intden'] = df_int_den_bg['D3bao'] + df_int_den_bg['D3bmm3'] + \
                                     df_int_den_bg['D3bmm4'] + df_int_den_bg['D3bpo3'] + df_int_den_bg['D3bpo4']
         df_int_den_bg['pct4way'] = df_int_den_bg['D3bmm4'] + df_int_den_bg['D3bpo4']
@@ -273,13 +269,105 @@ class va_preprocess:
         df_int_den_bg.to_csv(path_or_buf=out_file_path, index = False)
 
     #--------------------------------------------------------------------------------------------------
-    #def assemble_va_inputs(self):
-        #
+    def assemble_va_inputs(self):
+        #Assign a taz to UrbanSim households
+        #Then merge selected UrbanSim fields with employment accessibility, activity density and employment
+        #density data
 
-    
-                                                                                                    
-            
-            
+        #read the UrbanSim data into a pandas dataframe
+        try:
+            infile = self.in_folder + "\\" + self.urbansim_file
+            iter_csv = pd.read_csv(infile, iterator=True, chunksize=1000)
+            df_usim = pd.concat([chunk[chunk['person_num']==1] for chunk in iter_csv])
+            #slice off the desired columns
+            df_usim = df_usim[self.usim_fields]
+        except Exception as err:
+            msg = "Error reading urbansim file " + self.urbansim_file + " into dataframe."
+            raise RuntimeError(msg) from err
 
+        #read the block / taz lookup into a dataframe
+        try:
+            infile = self.in_folder + "\\" + self.blk_lut_file
+            blk_taz_lut = pd.read_csv(filepath_or_buffer=infile, header=0, index_col=None, usecols=['block_id','taz'])
+        except Exception as err:
+            msg = "Error reading taz lookup file " + infile + " into dataframe."
+            raise RuntimeError(msg) from err
+
+        #merge the block / taz lookup into the urbansim dataframe
+        df_usim = pd.merge(df_usim, blk_taz_lut, how='left', left_on='block_id', right_on='block_id')
+
+        #add and populate household size columns
+        try:
+            for i in range(len(self.hhsize_fields)):
+                hhsiz_fld = self.hhsize_fields[i]
+                #check to make sure at least one household has a person count of i+1
+                #python is apparently unhappy when asked to run lambda functions on an empty dataframe
+                if not(df_usim.loc[df_usim['persons'] == i+1].empty):
+                    if i < len(self.hhsize_fields) - 1:
+                        df_usim[hhsiz_fld] = df_usim.apply(lambda row: 1 if row.persons == i+1 else 0, axis = 1)
+                    else:
+                        df_usim[hhsiz_fld] = df_usim.apply(lambda row: 1 if row.persons >= i+1 else 0, axis = 1)
+        except Exception as err:
+            msg = "Error setting household size flags"
+            raise RuntimeError(msg) from err
+
+        #add and populate number of workers columns
+        try:
+            for i in range(len(self.numwrk_fields)):
+                numwrk_fld = self.numwrk_fields[i]
+                #check to see if at least one household has a worker count of i
+                if not(df_usim.loc[df_usim['workers'] == i].empty):
+                    if i < len(self.numwrk_fields) - 1:
+                        df_usim[numwrk_fld] = df_usim.apply(lambda row: 1 if row.workers == i else 0, axis = 1)
+                    else:
+                        df_usim[numwrk_fld] = df_usim.apply(lambda row: 1 if row.workers >= i else 0, axis = 1)
+        except Exception as err:
+            msg = "Error setting worker count fields"
+            raise RuntimeError(msg) from err
+
+        #dummy variable for low income households
+        try:
+            df_usim['dum_income'] = df_usim.apply(lambda row: 1 if row.hhinc2010 < 35000 else 0, axis = 1)
+        except Exception as err:
+            msg = "Error setting hh income dummy variable"
+            raise RuntimeError(msg) from err
+
+        #merge the intersection density data into the urbansim dataframe
+        try:
+            infile = self.in_folder + "\\" + self.int_den_file
+            df_intden = pd.read_csv(filepath_or_buffer=infile, header=0, index_col=None)
+        except Exception as err:
+            msg = "error reading intersection density file."
+            raise RuntimeError(msg) from err
+
+        df_usim = pd.merge(df_usim, df_intden, how='left', left_on='blockgroup_id', right_on='blockgroup_id')
         
-        
+        #merge the employment accessibility data into the urbansim dataframe
+        try:
+            infile = self.in_folder + "\\" + self.emp_access_file
+            df_empden = pd.read_csv(filepath_or_buffer=infile, header=0, index_col=None)
+        except Exception as err:
+            msg = "error reading employment accessibility file."
+            raise RuntimeError(msg) from err
+
+        try:
+            df_usim = pd.merge(df_usim, df_empden, how='left', left_on='taz', right_on='ID')
+        except Exception as err:
+            msg = "error merging empden into urbansim dataframe."
+            raise RuntimeError(msg) from err
+
+        #merge the activity density data into the urbansim dataframe
+         #merge the employment accessibility data into the urbansim dataframe
+        try:
+            infile = self.in_folder + "\\" + self.act_den_file
+            df_actden = pd.read_csv(filepath_or_buffer=infile, header=0, index_col=None)
+        except Exception as err:
+            msg = "error reading activity density file."
+            raise RuntimeError(msg) from err
+
+        df_usim = pd.merge(df_usim, df_actden, how='left', left_on='taz', right_on='taz')
+
+        #write the va model input data to a csv file
+        #write the intersection density data to a csv file
+        out_file_path = self.out_folder + "\\" + self.va_input_file
+        df_usim.to_csv(path_or_buf=out_file_path, index = False)
