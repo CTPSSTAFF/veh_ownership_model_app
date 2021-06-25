@@ -188,13 +188,13 @@ class va_preprocess:
         df_usim = pd.merge(df_usim, df_blk_taz_lut, left_on="block_id", right_on="block_id")
         df_usim['hh_pop'] = df_usim['persons'] * df_usim['area_fct']
         df_usim = df_usim[['taz','hh_pop']]
-
         df_hh_pop_taz = df_usim.groupby('taz').sum()
 
         #read the group quarters population file into a dataframe
         try:
             infile = self.in_folder + "\\" + self.gq_pop_file
             df_gq_pop_taz = pd.read_csv(filepath_or_buffer=infile, header=0, index_col=None, usecols=[0,1])
+            df_gq_pop_taz.columns = ['taz','gq_pop']
         except Exception as err:
             msg = "Error reading group quarters population file " + self.gq_pop_file + " into dataframe.\n" + str(err)
             raise RuntimeError(msg) from err

@@ -8,4 +8,4 @@ rem c:\users\paul\AppData\Local\Continuum\anaconda3\condabin\activate va_model &
 
 rem trnscd06
 rem In order to execute this script from a TransCAD macro, the full path to the Python script must be specified
-c:\ProgramData\Anaconda3\condabin\activate va_model && python D:\Projects\veh_ownership_model_app\code\preprocess_and_run_test.py & timeout /t 15
+c:\ProgramData\Anaconda3\condabin\activate va_model && python D:\Projects\veh_ownership_model_app\code\preprocess_test.py & timeout /t 15
