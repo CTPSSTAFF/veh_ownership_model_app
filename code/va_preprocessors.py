@@ -157,6 +157,10 @@ class va_preprocess:
             #merge the dataframe into the emp_access_df dataframe
             emp_access_df = pd.merge(emp_access_df, o_emp_df, how="left", left_on="ID", right_on="ID")
 
+        #rename the 'ID' column to 'taz'
+        emp_access_df.rename(columns = {"ID":"taz"},
+                             inplace = True)
+
         #write the employment accessibility metrics to a csv file
         out_file_path = self.out_folder + "\\" + self.emp_access_file
         emp_access_df.to_csv(path_or_buf=out_file_path, index = False)
@@ -351,7 +355,7 @@ class va_preprocess:
             raise RuntimeError(msg) from err
 
         try:
-            df_usim = pd.merge(df_usim, df_empden, how='left', left_on='taz', right_on='ID')
+            df_usim = pd.merge(df_usim, df_empden, how='right', left_on='taz', right_on='taz')
             #drop the ID column
             df_usim.drop('ID')
         except KeyError:
