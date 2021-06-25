@@ -194,7 +194,7 @@ class va_preprocess:
         #read the group quarters population file into a dataframe
         try:
             infile = self.in_folder + "\\" + self.gq_pop_file
-            df_gq_pop_taz = pd.read_csv(filepath_or_buffer=infile, header=0, index_col=None)
+            df_gq_pop_taz = pd.read_csv(filepath_or_buffer=infile, header=0, index_col=None, usecols=[0,1])
         except Exception as err:
             msg = "Error reading group quarters population file " + self.gq_pop_file + " into dataframe.\n" + str(err)
             raise RuntimeError(msg) from err
