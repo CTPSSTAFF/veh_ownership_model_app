@@ -1,0 +1,43 @@
+# Provide file names, folder paths and other required settings 
+# for pre- and post-processor scripts supporting
+# the application of a vehicle ownership model
+
+#file folders
+  in_folder: D:\Projects\veh_ownership_model_app\test_data
+  out_folder: D:\Projects\veh_ownership_model_app\test_data
+  
+#employment accessibility by taz
+  sov_skim_file: sov_skim.omx
+  sov_skim_name: "CongTime"
+  transit_skim_file: transit_skim.omx
+  transit_skim_name: "TotalTime"
+  skim_index: "mapcZ"
+
+  #employment file should have TAZ# in first column and total employment in second column
+  taz_emp_file: emp_taz.csv
+  emp_cols: ["ID", "Tot_Emp", "Srv_Emp", "Ret_Emp", "Bas_Emp"]
+  emp_access_file: emp_access_taz.csv
+
+  #travel time thresholds for employment accessibility metrics
+  sov_times: [10, 30]
+  transit_times: [30]
+
+#activity density 
+  urbansim_file: urbansim_run_35_microhouseholds_brief2040.csv
+  gq_pop_file: gq_pop10_taz.csv
+  landarea_file: sw_taz_land_area.csv
+  blk_fct_file: block10_taz_split.csv
+  act_den_file: activity_den_taz.csv
+
+#intersection density
+  smart_loc_file: smart_location_database.csv
+  int_den_file: intersection_den_bg.csv
+
+#assemble va input file
+  blk_lut_file: block10_taz_whole.csv
+  va_input_file: veh_ownership_model_RHS_2040.csv
+  usim_fields: ['HhId','blockgroup_id','block_id','persons','workers','hhinc2010']
+  hhsize_fields: ['hhsize_cat1','hhsize_cat2','hhsize_cat3','hhsize_cat4','hhsize_cat5']
+  numwrk_fields: ['employed_cat0','employed_cat1','employed_cat2','employed_cat3']
+
+

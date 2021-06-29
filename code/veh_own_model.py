@@ -20,26 +20,27 @@ class VehModel:
             with open(setup_file, 'r') as stream:    
                 setup = yaml.load(stream, Loader=yaml.FullLoader)
         except Exception as err:
-            msg = "Error reading setup file (" + setup_file + ")."
-            print(msg)
+            msg = "Error reading setup file (" + setup_file + ").\n" + str(err)
             raise RuntimeError(msg) from err
         
         self.setup = setup if setup is not None else {}
 
         try:
-            self.code_path   = self.setup['code_path']
-            self.data_path   = self.setup['data_file_path']
-            self.input_file  = self.setup['input_data_file']
-            self.output_file = self.setup['output_disagg_file']
-            self.aggregate   = self.setup['aggregate']
+            self.code_path      = self.setup['code_path']
+            self.data_path      = self.setup['data_file_path']
+            self.input_file     = self.setup['input_data_file']
+            self.output_file    = self.setup['output_disagg_file']
+            self.aggregate      = self.setup['aggregate']
             if self.aggregate:
                 self.output_agg_file = self.setup['output_agg_file']
                 self.agg_fields      = self.setup['output_agg_fields']
             self.model_spec_file = self.code_path + "\\" + self.setup['model_spec_file']
             self.veh_fields      = self.setup['veh_fields']
+            self.blk_fct_file   = self.setup['blk_fct_file']
+            self.split_factor   = self.setup['split_factor']
+            
         except Exception as err:
-            msg = "Required setup parameter(s) were not found in file '" + setup_file + "."
-            print(msg)
+            msg = "Required setup parameter(s) were not found in file '" + setup_file + ".\n" + str(err)
             raise RuntimeError(msg) from err
 
     # Method load_data should be defined by subclasses of veh_model
@@ -67,9 +68,38 @@ class VehModel:
             out_file_path = self.data_path + "\\" + self.output_file
             self.df.to_csv(path_or_buf=out_file_path,index=False)
         except Exception as err:
-            msg = "Error writing dataframe to file."
+            msg = "Error writing dataframe to file.\n" + str(err)
             raise RuntimeError(msg) from err
 
+    # Method split_hh_to_taz
+    # Merge disaggregate model results dataframe with block to taz split table
+    # Apply split factors to 0 / 1 flag columns
+    def split_hh_to_taz(self):
+        #read block / taz factor file into a dataframe
+        try:
+            infile = self.data_path + "\\" + self.blk_fct_file
+            df_factors = pd.read_csv(filepath_or_buffer=infile, header=0, index_col=None, usecols=['block_id','area_fct'])
+        except Exception as err:
+            msg = "Error reading block split factor file\n" + str(err)
+            raise RuntimeError(msg) from err
+
+        #drop taz column from VA model output
+        try:
+            self.df.drop('taz')
+        except KeyError:
+            #no big deal if the column doesn't exist
+            pass
+        except Exception as err:
+            msg = "Error dropping taz column.\n" + str(err)
+            raise RuntimeError(msg) from err
+
+        #merge the split factors into the va output
+        self.df = pd.merge(self.df, df_factors, left_on='block_id', right_on='block_id')
+
+        #apply the split factors to the flags
+        for i in range(1,len(self.agg_fields)):
+            self.df[self.agg_fields[i]] = self.df[self.agg_fields[i]] * self.df[self.split_factor]
+ 
     # Method aggregate_results
     # Summarize dataframe of processed household / zonal data by aggregate geography
     # Include fields in output_agg_fields list
@@ -79,8 +109,7 @@ class VehModel:
             df2         = self.df[self.agg_fields]
             df2_grouped = df2.groupby(self.agg_fields[0]).sum()
         except Exception as err:
-            msg = "Error aggregating results"
-            print(err)
+            msg = "Error aggregating results.\n" + str(err)
             raise RuntimeError(msg) from err
 
         #write the results to a text file
@@ -88,5 +117,5 @@ class VehModel:
             out_file_path = self.data_path + "\\" + self.output_agg_file
             df2_grouped.to_csv(path_or_buf=out_file_path)
         except Exception as err:
-            msg = "Error writing aggregated output to file."
+            msg = "Error writing aggregated output to file.\n" + str(err)
             raise RuntimeError(msg) from err
