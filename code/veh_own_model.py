@@ -108,6 +108,9 @@ class VehModel:
         try:
             df2         = self.df[self.agg_fields]
             df2_grouped = df2.groupby(self.agg_fields[0]).sum()
+            #round all values to integers
+            for i in range(1,len(self.agg_fields)):
+                df2_grouped[self.agg_fields[i]] = round(df2_grouped[self.agg_fields[i]],0)
         except Exception as err:
             msg = "Error aggregating results.\n" + str(err)
             raise RuntimeError(msg) from err
