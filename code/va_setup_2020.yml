@@ -36,7 +36,7 @@
 #assemble va input file
   blk_lut_file: block10_taz_whole.csv
   va_input_file: veh_ownership_model_RHS_2020.csv
-  usim_fields: ['HhId','blockgroup_id','block_id','persons','workers','hhinc2010']
+  usim_fields: ['hid','blockgroup_id','block_id','persons','workers','hh_inc']
   hhsize_fields: ['hhsize_cat1','hhsize_cat2','hhsize_cat3','hhsize_cat4','hhsize_cat5']
   numwrk_fields: ['employed_cat0','employed_cat1','employed_cat2','employed_cat3']
 
