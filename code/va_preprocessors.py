@@ -331,7 +331,7 @@ class va_preprocess:
 
         #dummy variable for low income households
         try:
-            df_usim['dum_income'] = df_usim.apply(lambda row: 1 if row.hhinc2010 < 35000 else 0, axis = 1)
+            df_usim['dum_income'] = df_usim.apply(lambda row: 1 if row.hh_inc < 35000 else 0, axis = 1)
         except Exception as err:
             msg = "Error setting hh income dummy variable.\n" + str(err)
             raise RuntimeError(msg) from err

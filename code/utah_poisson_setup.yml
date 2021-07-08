@@ -7,10 +7,10 @@
 #these itmes are read into class instance variables by the __init__ method of class VehModel
 code_path:          D:\Projects\veh_ownership_model_app\code
 data_file_path:     D:\Projects\veh_ownership_model_app\test_data
-input_data_file:    veh_ownership_model_RHS_2040.csv
+input_data_file:    veh_ownership_model_RHS_2020.csv
 aggregate:          yes
-output_disagg_file: veh_ownership_model_out_2040.csv
-output_agg_file:    veh_ownership_model_out_taz_2040.csv
+output_disagg_file: veh_ownership_model_out_2020.csv
+output_agg_file:    veh_ownership_model_out_taz_2020.csv
 output_agg_fields:  ["taz","hhsize_cat1","hhsize_cat2","hhsize_cat3","hhsize_cat4","hhsize_cat5","employed_cat0","employed_cat1","employed_cat2","employed_cat3","hh_veh0","hh_veh1","hh_veh2","hh_veh3p"]
 model_spec_file:    utah_poisson_spec.yml
 veh_fields:         ["hh_veh0", "hh_veh1", "hh_veh2", "hh_veh3p"]
