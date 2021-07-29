@@ -56,6 +56,8 @@ class va_preprocess:
             self.usim_fields = self.setup['usim_fields']
             self.hhsize_fields = self.setup['hhsize_fields']
             self.numwrk_fields = self.setup['numwrk_fields']
+            self.hhinc_fields = self.setup['hhinc_fields']
+            self.hhinc_breaks = self.setup['hhinc_breaks']
 
         except Exception as err:
             msg = "Required setup parameter(s) were not found in file '" + setup_file + "'.\n" + str(err)
@@ -336,6 +338,20 @@ class va_preprocess:
             msg = "Error setting hh income dummy variable.\n" + str(err)
             raise RuntimeError(msg) from err
 
+        #add and populate income category columns
+        try:
+            for i in range(len(self.hhinc_fields)):
+                inc_fld = self.hhinc_fields[i]
+                high=self.hhinc_breaks[i]
+                if i==0:
+                    low=0
+                else:
+                    low=self.hhinc_breaks[i-1]
+                df_usim[inc_fld] = df_usim.apply(lambda row: self.inc_flag(row.hh_inc, low, high), axis = 1)
+        except Exception as err:
+            msg = "Error setting household income fields.\n" + str(err)
+            raise RuntimeError(msg) from err
+                    
         #merge the intersection density data into the urbansim dataframe
         try:
             infile = self.in_folder + "\\" + self.int_den_file
@@ -380,3 +396,11 @@ class va_preprocess:
         #write the intersection density data to a csv file
         out_file_path = self.out_folder + "\\" + self.va_input_file
         df_usim.to_csv(path_or_buf=out_file_path, index = False)
+
+    def inc_flag(self, inc, lo, hi):
+        #returns 1 if inc is between lo and hi, 0 otherwise
+        if inc >= lo and inc < hi:
+            flag = 1
+        else:
+            flag = 0
+        return flag

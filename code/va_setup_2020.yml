@@ -39,5 +39,7 @@
   usim_fields: ['hid','blockgroup_id','block_id','persons','workers','hh_inc']
   hhsize_fields: ['hhsize_cat1','hhsize_cat2','hhsize_cat3','hhsize_cat4','hhsize_cat5']
   numwrk_fields: ['employed_cat0','employed_cat1','employed_cat2','employed_cat3']
+  hhinc_fields: ['hhinc_cat1','hhinc_cat2','hhinc_cat3','hhinc_cat4']
+  hhinc_breaks: [35000,75000,125000,9999999]
 
 
