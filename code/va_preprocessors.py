@@ -81,7 +81,7 @@ class va_preprocess:
             msg = "Error reading SOV skim matrix " + self.sov_skim_file + ".\n" + str(err)
             raise RuntimeError(msg) from err
 
-        #read the transit travel time matrix into an arr
+        #read the transit travel time matrix into an array
         try:
             transit_file = omx.open_file(self.in_folder + "\\" + self.transit_skim_file, 'r')
             transit_mtx = transit_file[self.transit_skim_name]

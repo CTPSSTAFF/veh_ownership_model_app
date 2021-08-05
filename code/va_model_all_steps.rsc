@@ -29,6 +29,9 @@ Macro "Run_VA_Model" (Args)
     result = RunMacro("Apply_Model", Args)
     if result=0 then goto quit
 
+    //for future development: a macro that assembles a land use table for trip generation
+    //from va model output and other files
+
     quit:
 endMacro
 
