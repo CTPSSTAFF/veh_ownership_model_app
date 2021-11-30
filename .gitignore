@@ -12,3 +12,4 @@
 .db
 /omx_test   
 /test_code
+*.accddb
